@@ -25,6 +25,14 @@ class Gaem
         SIZE
     };
 
+    enum WallType
+    {
+        TOP,
+        LEFT,
+        RIGHT,
+        BOTTOM
+    };
+
     public:
         Gaem();
         void run();
@@ -36,12 +44,16 @@ class Gaem
 
         void init();
         void startGaem();
+        void restartGaem();
 
     private:
         static const sf::Time TimePerFrame;
  
         sf::RenderWindow mWindow;
         sf::FloatRect mViewBounds;
+
+        bool mIsPlaying;
+        bool mIsTouched;
 
         sf::RectangleShape mP1;
         sf::RectangleShape mP2;
@@ -52,9 +64,11 @@ class Gaem
         sf::Vector2f mBallDirection;
 
         PlayerType mLastPlayerCollide;
+        std::map <WallType, sf::FloatRect> mWallsMap;
         std::map <PlayerType, sf::FloatRect> mGoalsMap;
 
-        std::map <PlayerType, int> mScoreMap;
+        int mScoreP1;
+        int mScoreP2;
         
         sf::Text mTextScoreP1;
         sf::Text mTextScoreP2;

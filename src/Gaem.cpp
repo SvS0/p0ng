@@ -4,12 +4,13 @@
 
 #include <cstdlib>
 #include <time.h>
+#include <string>
 
 Gaem::Gaem()
 : mWindow(sf::VideoMode(800, 600), "P0NG", sf::Style::Close)
 , mViewBounds(sf::Vector2f(0.0f,0.0f), sf::Vector2f(800.0f, 600.0f))
+, mWallsMap()
 , mGoalsMap()
-, mScoreMap()
 , mTextScoreP1()
 , mTextScoreP2()
 , mFont()
@@ -19,13 +20,24 @@ Gaem::Gaem()
 
     init();
 
-    //Player && Goals map
-    mGoalsMap.insert(std::make_pair(PlayerType::P1, sf::FloatRect(sf::Vector2f(800.0f, 0.0f), sf::Vector2f(0.0f, 600.0f))));
-    mGoalsMap.insert(std::make_pair(PlayerType::P2, sf::FloatRect(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(0.0f, 600.0f))));
+    //Walls Map settings
+    mWallsMap.insert(std::make_pair(WallType::TOP, sf::FloatRect(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(800.0f, 1.0f))));
+    mWallsMap.insert(std::make_pair(WallType::LEFT, sf::FloatRect(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(1.0f, 600.0f))));
+    mWallsMap.insert(std::make_pair(WallType::RIGHT, sf::FloatRect(sf::Vector2f(800.0f, 0.0f), sf::Vector2f(1.0f, 600.0f))));
+    mWallsMap.insert(std::make_pair(WallType::BOTTOM, sf::FloatRect(sf::Vector2f(0.0f, 600.0f), sf::Vector2f(800.0f, 1.0f))));
 
-    //Player Score map
-    mScoreMap.insert(std::make_pair(PlayerType::P1, 0));
-    mScoreMap.insert(std::make_pair(PlayerType::P2, 0));
+    //Goals Map settings
+    mGoalsMap.insert(std::make_pair(PlayerType::P1, sf::FloatRect(sf::Vector2f(800.0f, 0.0f), sf::Vector2f(1.0f, 600.0f))));
+    mGoalsMap.insert(std::make_pair(PlayerType::P2, sf::FloatRect(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(1.0f, 600.0f))));
+
+    mLastPlayerCollide = PlayerType::NONE;
+
+    mFont.loadFromFile("resources/8bitOperatorPlus8-Bold.ttf");
+
+    mScoreP1 = 0;
+    mScoreP2 = 0;
+
+    mIsTouched = false;
 
     startGaem();
 }
@@ -90,30 +102,26 @@ void Gaem::init()
     mBall.setFillColor(sf::Color::Black);
     mBallVel = 200.0f;
 
-    mFont.loadFromFile("resources/8bitOperatorPlus8-Bold.ttf");
-
     mTextScoreP1.setPosition(200,50);
     mTextScoreP1.setFont(mFont);
-    //mTextScoreP1.setString(mScoreMap.find[PlayerType::P1]);
 
     mTextScoreP2.setPosition(250, 50);
     mTextScoreP2.setFont(mFont);
-    //mTextScoreP2.setString(mScoreMap.find[PlayerType::P2]);
 
 }
 
 void Gaem::startGaem()
 {
-    time_t t;
-    srand((unsigned) time(&t));
+    srand(time(NULL));
 
     //Choosing random player
-    if(mLastPlayerCollide == PlayerType::NONE)
+    if(mLastPlayerCollide == PlayerType::NONE || !mIsTouched)
     {
         int random = (rand() % 2) + 1;
         mLastPlayerCollide = static_cast<PlayerType>(random);
     }
-        
+    mIsTouched = false;
+         
     //Choosing random point between player's goal bounds
     sf::Vector2f goalVector = sf::Vector2f(mGoalsMap[mLastPlayerCollide].width, mGoalsMap[mLastPlayerCollide].height);
     int goalLength = length(goalVector);
@@ -122,24 +130,46 @@ void Gaem::startGaem()
 
     //Setting ball direction
     mBallDirection = unitVector(sf::Vector2f(mTarget - mBall.getPosition()));
+
+    mIsPlaying = true;
 }
 
 void Gaem::update(sf::Time dt) 
 {  
     //Update score
-    for(std::map<PlayerType, sf::FloatRect>::iterator it = mGoalsMap.begin(); it != mGoalsMap.end(); ++it)
+    for(std::map<WallType, sf::FloatRect>::iterator it = mWallsMap.begin(); it != mWallsMap.end(); ++it)
     {
-        if (mBall.getGlobalBounds().intersects(it->second))
+        sf::FloatRect wallBounds = it->second;
+        if (wallBounds.intersects(mBall.getGlobalBounds()))
         {
-            // int score = mScoreMap.find[it->first];
-            // score++;
-            // mScoreMap.find[it->first] = score;
+            WallType wall = it->first;
+            switch (wall)
+            {
+                case WallType::LEFT : 
+                    mScoreP2++;
+                    mIsPlaying = false;
+                    break;
 
+                case WallType::RIGHT :
+                    mScoreP1++;
+                    mIsPlaying = false;
+                    break;
+
+                default :
+                    break;
+            }
         }
     }
 
+    //Update textScore
+    mTextScoreP1.setString(std::to_string(mScoreP1));
+    mTextScoreP2.setString(std::to_string(mScoreP2));
+
     //Update ball's position
     mBall.setPosition(mBall.getPosition() + (mBallDirection * mBallVel * dt.asSeconds()));
+
+    if (!mIsPlaying)
+        restartGaem();
 }
 
 void Gaem::render()
@@ -154,4 +184,10 @@ void Gaem::render()
 
     mWindow.setView(mWindow.getDefaultView());
     mWindow.display();
+}
+
+void Gaem::restartGaem()
+{
+    init();
+    startGaem();
 }
