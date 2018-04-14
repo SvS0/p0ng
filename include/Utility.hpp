@@ -28,5 +28,7 @@ float length(sf::Vector2f vector);
 
 sf::Vector2f unitVector(sf::Vector2f vector);
 
+sf::Vector2f direction(sf::Vector2f origin, sf::Vector2f target);
+
 #include <Utility.inl>
 #endif //UTILITY_HPP

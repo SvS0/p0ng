@@ -153,3 +153,8 @@ sf::Vector2f unitVector(sf::Vector2f vector)
     assert(vector != sf::Vector2f(0.f,0.f));
     return vector / length(vector);
 }
+
+sf::Vector2f direction(sf::Vector2f origin, sf::Vector2f target)
+{
+	return unitVector(target - origin);
+}

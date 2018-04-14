@@ -126,10 +126,10 @@ void Gaem::startGaem()
     sf::Vector2f goalVector = sf::Vector2f(mGoalsMap[mLastPlayerCollide].width, mGoalsMap[mLastPlayerCollide].height);
     int goalLength = length(goalVector);
 
-    sf::Vector2f mTarget = sf::Vector2f(mGoalsMap[mLastPlayerCollide].left, rand() % (int) goalLength);
+    sf::Vector2f target = sf::Vector2f(mGoalsMap[mLastPlayerCollide].left, rand() % (int) goalLength);
 
     //Setting ball direction
-    mBallDirection = unitVector(sf::Vector2f(mTarget - mBall.getPosition()));
+    mBallDirection = unitVector(target - mBall.getPosition());
 
     mIsPlaying = true;
 }
@@ -145,6 +145,10 @@ void Gaem::update(sf::Time dt)
             WallType wall = it->first;
             switch (wall)
             {
+                case WallType::TOP :
+                    mBallDirection.y *= -1.0f;
+                    break;
+
                 case WallType::LEFT : 
                     mScoreP2++;
                     mIsPlaying = false;
@@ -155,10 +159,24 @@ void Gaem::update(sf::Time dt)
                     mIsPlaying = false;
                     break;
 
+                case WallType::BOTTOM :
+                    mBallDirection.y *= -1.0f;
+                    break;
+
                 default :
                     break;
             }
         }
+    }
+
+    if (mP1.getGlobalBounds().intersects(mBall.getGlobalBounds()))
+    {
+
+    }
+
+    if (mP2.getGlobalBounds().intersects(mBall.getGlobalBounds()))
+    {
+
     }
 
     //Update textScore
