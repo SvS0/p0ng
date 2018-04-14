@@ -3,12 +3,16 @@
 #include <Utility.hpp>
 
 #include <cstdlib>
-#include <ctime>
+#include <time.h>
 
 Gaem::Gaem()
 : mWindow(sf::VideoMode(800, 600), "P0NG", sf::Style::Close)
-, mViewBounds(sf::Vector2i(0,0), sf::Vector2i(800, 600))
+, mViewBounds(sf::Vector2f(0.0f,0.0f), sf::Vector2f(800.0f, 600.0f))
 , mGoalsMap()
+, mScoreMap()
+, mTextScoreP1()
+, mTextScoreP2()
+, mFont()
 {
     //enables/disable key press repeat
     mWindow.setKeyRepeatEnabled(false);
@@ -16,11 +20,14 @@ Gaem::Gaem()
     init();
 
     //Player && Goals map
-    mGoalsMap.insert(std::make_pair(PlayerType::P1, sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(0, 600))));
-    mGoalsMap.insert(std::make_pair(PlayerType::P2, sf::IntRect(sf::Vector2i(800, 0), sf::Vector2i(800, 600))));
+    mGoalsMap.insert(std::make_pair(PlayerType::P1, sf::FloatRect(sf::Vector2f(800.0f, 0.0f), sf::Vector2f(0.0f, 600.0f))));
+    mGoalsMap.insert(std::make_pair(PlayerType::P2, sf::FloatRect(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(0.0f, 600.0f))));
 
-    srand(time(NULL));
-    startGaem(static_cast<PlayerType>(rand() % PlayerType::size));
+    //Player Score map
+    mScoreMap.insert(std::make_pair(PlayerType::P1, 0));
+    mScoreMap.insert(std::make_pair(PlayerType::P2, 0));
+
+    startGaem();
 }
 
 const sf::Time Gaem::TimePerFrame = sf::seconds(1.f/60.f);
@@ -67,8 +74,6 @@ void Gaem::init()
     mP1.setOutlineThickness(5.0f);
     mP1.setOutlineColor(sf::Color::Cyan);
     mP1.setFillColor(sf::Color::Black);
-
-    mScoreP1 = 0;
     
     mP2 = sf::RectangleShape();
     mP2.setSize(sf::Vector2f(25.0f, 100.0f));
@@ -76,7 +81,6 @@ void Gaem::init()
     mP2.setOutlineThickness(5.0f);
     mP2.setOutlineColor(sf::Color::Magenta);
     mP2.setFillColor(sf::Color::Black);
-    mScoreP2 = 0;
 
     mBall = sf::CircleShape();
     mBall.setPosition(sf::Vector2f(400.0f,300.0f));
@@ -84,32 +88,58 @@ void Gaem::init()
     mBall.setOutlineThickness(2.5f);
     mBall.setOutlineColor(sf::Color::Yellow);
     mBall.setFillColor(sf::Color::Black);
-    mBallVel = 100.0f;
+    mBallVel = 200.0f;
+
+    mFont.loadFromFile("resources/8bitOperatorPlus8-Bold.ttf");
+
+    mTextScoreP1.setPosition(200,50);
+    mTextScoreP1.setFont(mFont);
+    //mTextScoreP1.setString(mScoreMap.find[PlayerType::P1]);
+
+    mTextScoreP2.setPosition(250, 50);
+    mTextScoreP2.setFont(mFont);
+    //mTextScoreP2.setString(mScoreMap.find[PlayerType::P2]);
+
 }
 
-void Gaem::startGaem(PlayerType player)
+void Gaem::startGaem()
 {
-    mBall.setPosition(400.0f, 300.0f);
+    time_t t;
+    srand((unsigned) time(&t));
 
-    auto it = mGoalsMap.find(player);
-    sf::IntRect playerGoal = it->second;
-    
-    sf::Vector2f rangeVector = sf::Vector2f(playerGoal.top, playerGoal.height) - sf::Vector2f(playerGoal.top, playerGoal.left); 
-    float rangeAngle = toDegree((pendant(rangeVector)));
-
-    srand(time(NULL));
-    float randomDistance = rand() % (int) length(rangeVector);
-
-    sf::Vector2f targetVector = directionVector(rangeAngle) * randomDistance;
-
-    sf::Vector2f ballVector = targetVector - mBall.getPosition();
+    //Choosing random player
+    if(mLastPlayerCollide == PlayerType::NONE)
+    {
+        int random = (rand() % 2) + 1;
+        mLastPlayerCollide = static_cast<PlayerType>(random);
+    }
         
-    mBallAngle = toDegree((pendant(ballVector)));
+    //Choosing random point between player's goal bounds
+    sf::Vector2f goalVector = sf::Vector2f(mGoalsMap[mLastPlayerCollide].width, mGoalsMap[mLastPlayerCollide].height);
+    int goalLength = length(goalVector);
+
+    sf::Vector2f mTarget = sf::Vector2f(mGoalsMap[mLastPlayerCollide].left, rand() % (int) goalLength);
+
+    //Setting ball direction
+    mBallDirection = unitVector(sf::Vector2f(mTarget - mBall.getPosition()));
 }
 
 void Gaem::update(sf::Time dt) 
 {  
-    mBall.setPosition(mBall.getPosition() + (directionVector(mBallAngle) * mBallVel * dt.asSeconds()));
+    //Update score
+    for(std::map<PlayerType, sf::FloatRect>::iterator it = mGoalsMap.begin(); it != mGoalsMap.end(); ++it)
+    {
+        if (mBall.getGlobalBounds().intersects(it->second))
+        {
+            // int score = mScoreMap.find[it->first];
+            // score++;
+            // mScoreMap.find[it->first] = score;
+
+        }
+    }
+
+    //Update ball's position
+    mBall.setPosition(mBall.getPosition() + (mBallDirection * mBallVel * dt.asSeconds()));
 }
 
 void Gaem::render()
@@ -119,6 +149,8 @@ void Gaem::render()
     mWindow.draw(mP1);
     mWindow.draw(mP2);
     mWindow.draw(mBall);
+    mWindow.draw(mTextScoreP1);
+    mWindow.draw(mTextScoreP2);
 
     mWindow.setView(mWindow.getDefaultView());
     mWindow.display();

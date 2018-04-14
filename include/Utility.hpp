@@ -25,9 +25,7 @@ float toDegree(float radian);
 float toRadian(float degree);
 
 float length(sf::Vector2f vector);
-float pendant(sf::Vector2f vector);
 
-sf::Vector2f directionVector(float angle);
 sf::Vector2f unitVector(sf::Vector2f vector);
 
 #include <Utility.inl>

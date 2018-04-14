@@ -148,20 +148,6 @@ float length(sf::Vector2f vector)
     return std::sqrt(vector.x * vector.x + vector.y * vector.y);
 }
 
-float pendant(sf::Vector2f vector)
-{
-	return vector.x != 0 ? vector.y / vector.x : 0; 
-}
-
-sf::Vector2f directionVector(float angle)
-{
-    sf::Vector2f movement = sf::Vector2f();
-    movement.x = cosf(angle);  
-    movement.y = sinf(angle);
-
-	return movement;
-}
-
 sf::Vector2f unitVector(sf::Vector2f vector)
 {
     assert(vector != sf::Vector2f(0.f,0.f));

@@ -5,6 +5,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/Font.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
@@ -18,9 +19,10 @@ class Gaem
 
     enum PlayerType
     {
+        NONE,
         P1,
         P2,
-        size
+        SIZE
     };
 
     public:
@@ -33,26 +35,31 @@ class Gaem
         void render();
 
         void init();
-        void startGaem(PlayerType player);
+        void startGaem();
 
     private:
         static const sf::Time TimePerFrame;
  
         sf::RenderWindow mWindow;
-        sf::IntRect mViewBounds;
+        sf::FloatRect mViewBounds;
 
         sf::RectangleShape mP1;
-        int mScoreP1;
-        
         sf::RectangleShape mP2;
-        int mScoreP2;
 
         sf::CircleShape mBall;
+        sf::FloatRect mBallBounds; 
         float mBallVel;
-        float mBallAngle;
+        sf::Vector2f mBallDirection;
 
-        std::map <PlayerType, sf::IntRect> mGoalsMap;
+        PlayerType mLastPlayerCollide;
+        std::map <PlayerType, sf::FloatRect> mGoalsMap;
 
+        std::map <PlayerType, int> mScoreMap;
+        
+        sf::Text mTextScoreP1;
+        sf::Text mTextScoreP2;
+
+        sf::Font mFont;
 };
 
 #endif // GAEM_HPP
