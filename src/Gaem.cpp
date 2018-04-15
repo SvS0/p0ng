@@ -193,10 +193,6 @@ void Gaem::update(sf::Time dt)
         mP2.getGlobalBounds().intersects(mBall.getGlobalBounds()))
             mBallDirection.x *= -1.0f;
 
-    if (mP1.getGlobalBounds().intersects(mBall.getGlobalBounds()) ||
-        mP2.getGlobalBounds().intersects(mBall.getGlobalBounds()))
-            mBallDirection.x *= -1.0f;
-
 
     //Update textScore
     mTextScoreP1.setString(std::to_string(mScoreP1));
