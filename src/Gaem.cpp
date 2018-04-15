@@ -151,7 +151,7 @@ void Gaem::update(sf::Time dt)
             sf::Keyboard::isKeyPressed(sf::Keyboard::Up))  
         mP2.setPosition(sf::Vector2f(mP2.getPosition().x, mP2.getPosition().y - (mP2Vel * dt.asSeconds())));
 
-    if  (!mP2.getGlobalBounds().intersects(mWallsMap[WallType::TOP]) && 
+    if  (!mP2.getGlobalBounds().intersects(mWallsMap[WallType::BOTTOM]) && 
             sf::Keyboard::isKeyPressed(sf::Keyboard::Down))  
         mP2.setPosition(sf::Vector2f(mP2.getPosition().x, mP2.getPosition().y + (mP2Vel * dt.asSeconds())));
 
