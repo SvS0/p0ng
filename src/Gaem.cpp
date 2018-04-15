@@ -86,6 +86,7 @@ void Gaem::init()
     mP1.setOutlineThickness(5.0f);
     mP1.setOutlineColor(sf::Color::Cyan);
     mP1.setFillColor(sf::Color::Black);
+    mP1Vel = 100.0f;
     
     mP2 = sf::RectangleShape();
     mP2.setSize(sf::Vector2f(25.0f, 100.0f));
@@ -93,6 +94,7 @@ void Gaem::init()
     mP2.setOutlineThickness(5.0f);
     mP2.setOutlineColor(sf::Color::Magenta);
     mP2.setFillColor(sf::Color::Black);
+    mP2Vel = 100.0f;
 
     mBall = sf::CircleShape();
     mBall.setPosition(sf::Vector2f(400.0f,300.0f));
@@ -136,6 +138,23 @@ void Gaem::startGaem()
 
 void Gaem::update(sf::Time dt) 
 {  
+    //Player movement management
+    if  (!mP1.getGlobalBounds().intersects(mWallsMap[WallType::TOP]) && 
+            sf::Keyboard::isKeyPressed(sf::Keyboard::W))  
+        mP1.setPosition(sf::Vector2f(mP1.getPosition().x, mP1.getPosition().y - (mP1Vel * dt.asSeconds())));
+
+    if  (!mP1.getGlobalBounds().intersects(mWallsMap[WallType::BOTTOM]) && 
+            sf::Keyboard::isKeyPressed(sf::Keyboard::S))  
+        mP1.setPosition(sf::Vector2f(mP1.getPosition().x, mP1.getPosition().y + (mP1Vel * dt.asSeconds())));
+
+    if  (!mP2.getGlobalBounds().intersects(mWallsMap[WallType::TOP]) && 
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Up))  
+        mP2.setPosition(sf::Vector2f(mP2.getPosition().x, mP2.getPosition().y - (mP2Vel * dt.asSeconds())));
+
+    if  (!mP2.getGlobalBounds().intersects(mWallsMap[WallType::TOP]) && 
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Down))  
+        mP2.setPosition(sf::Vector2f(mP2.getPosition().x, mP2.getPosition().y + (mP2Vel * dt.asSeconds())));
+
     //Update score
     for(std::map<WallType, sf::FloatRect>::iterator it = mWallsMap.begin(); it != mWallsMap.end(); ++it)
     {
@@ -169,15 +188,15 @@ void Gaem::update(sf::Time dt)
         }
     }
 
-    if (mP1.getGlobalBounds().intersects(mBall.getGlobalBounds()))
-    {
+    //naive player's collission
+    if (mP1.getGlobalBounds().intersects(mBall.getGlobalBounds()) ||
+        mP2.getGlobalBounds().intersects(mBall.getGlobalBounds()))
+            mBallDirection.x *= -1.0f;
 
-    }
+    if (mP1.getGlobalBounds().intersects(mBall.getGlobalBounds()) ||
+        mP2.getGlobalBounds().intersects(mBall.getGlobalBounds()))
+            mBallDirection.x *= -1.0f;
 
-    if (mP2.getGlobalBounds().intersects(mBall.getGlobalBounds()))
-    {
-
-    }
 
     //Update textScore
     mTextScoreP1.setString(std::to_string(mScoreP1));

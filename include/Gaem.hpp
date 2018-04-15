@@ -56,7 +56,12 @@ class Gaem
         bool mIsTouched;
 
         sf::RectangleShape mP1;
+        sf::Vector2f mP1Direction;
+        float mP1Vel;
+
         sf::RectangleShape mP2;
+        sf::Vector2f mP2Direction;
+        float mP2Vel;
 
         sf::CircleShape mBall;
         sf::FloatRect mBallBounds; 
